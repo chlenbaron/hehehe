@@ -1,0 +1,263 @@
+# define _CRT_SECURE_NO_WARNINGS 1
+#include<stdio.h>
+#include<time.h>
+#include<stdlib.h>
+#include<Windows.h>
+#include<malloc.h>
+#include<string.h>
+
+typedef struct point{
+	int nums;
+	char name;
+	int grade;
+	struct point *next;
+}point;
+
+void intipointlink(point *head);
+void showpoints(point head);
+void showonepoint(point head);
+void destroy(point *head);
+void insert(point *heads);
+point *found(point head, int oldrows, int oldcols);
+void *create(int rows, int cols);
+void *delete(point head, int rows, int cols);
+void showtopic(char *topic);
+void *ordering(point head);
+
+void *ordering(point head)
+{
+	point *pi, *pj, *pt, t;
+	for (pi = head.next; pi; pi = pi->next)
+	for (pj = pi->next; pj; pj = pj->next)
+	if (pi->grade > pj->grade)
+	{
+		t = *pi;
+		*pi = *pj;
+		*pj = t;
+
+		pt = pi->next;
+		pi->next = pj->next;
+		pj->next = pt;
+	}
+	return pi;
+}
+void showtopic(char *topic)
+{
+	char space[] = "                                       ";
+	printf("%s %s\n", space + (strlen(topic) / 2), topic);
+}
+void *create(int rows, char name,int cols)
+{
+	point *p;
+	p = (point *)malloc(sizeof(point));
+	p->nums= rows;
+	p->name = name;
+	p->grade = cols;
+	p->next = NULL;
+	return p;
+}
+
+void showonepoint(point head)
+{
+	printf(" (%d %c %d) ", head.nums, head.name,head.grade);
+}
+void showpoints(point head)
+{
+	point *p;
+	printf("\n当前坐标如下：\n");
+	for (p = head.next; p; p = p->next)
+	{
+		showonepoint(*p);
+
+	}
+}
+void  initpointlink(point *head)
+{
+	int rows;
+	int cols;
+	char name;
+	point *p;
+	if (head->next == NULL)
+	{
+		showtopic("\n请输入学生信息（学号 姓名 成绩）输入0 0 0结束录入\n");
+		scanf("%d %c %d", &rows,&name, &cols);
+		fflush(stdin);
+		while (rows&&cols)
+		{
+			p = create(rows,name,cols);
+			head->next = p;
+			head = p;
+			showtopic("\n请输入学生信息（学号 姓名 成绩）输入0结束录入");
+			scanf("%d %c %d", &rows,&name,&cols);
+			fflush(stdin);
+		}
+	}
+	else
+		showtopic("\n你不能对已有链表初始化\n");
+}
+void destroy(point *head)
+{
+	point *p;
+	while (head->next)
+	{
+		p = head->next;
+		head->next = p->next;
+		free(p);
+	}
+}
+point *found(point head, int oldnums)
+{
+	point *p;
+	point *q = NULL;
+	for (p = head.next; p &&p->nums != oldnums; p = p->next)
+		q = p;
+	return q;
+
+	//若指定点为第一个，返回值为NULL
+	//若指定点为除了第一个以外的其他节点，则该函数的返回值为目标的前一个指定点。
+	//若指定点不存在，则该函数的返回值指向末节点。
+}
+
+void insert(point *head)   //采用左插入节点方式
+{
+	int newrows;
+	int newcols;
+	char name;
+	int oldnums;
+	point *p;
+	point *pro;
+	showtopic("\n当前学生信息如下，请根据你的需要左插入\n");
+	showpoints(*head);
+	showtopic("\n请输入你将要插入的位置（输入目标位置右边的学号）\n");
+	scanf("%d",&oldnums);
+	fflush(stdin);
+	pro = found(*head, oldnums);
+	showtopic("\n请输入你要插入的同学的数据\n");
+	scanf("%d &c %d", &newrows,&name, &newcols);
+	fflush(stdin);
+	p = create(newrows,name, newcols);
+	if (NULL == pro)
+	{
+		pro = head;
+	}
+	p->next = pro->next;
+	pro->next = p;
+	//if (pro == NULL)  //新点插入到头结点的后面（原来第一个有效节点前面)
+	//{
+	//	p->next = head->next;
+	//	head->next = p;
+	//}
+	//else if (pro->next==NULL)  //指定点不存在，应补充在链表的后面。
+	//{
+	// p->next = pro->next;
+	//	pro->next = p;
+	//}
+	//else
+	//{
+	//	p->next = pro->next;
+	//	pro->next = p;
+
+	//}
+}
+void *delete(point *head)
+{
+	int rows;
+	point *p;
+	point *pro;
+	showpoints(*head);
+	showtopic("\n请输入你需要删除的同学学号\n");
+	scanf("%d", &rows);
+	fflush(stdin);
+	pro = found(*head, &rows);
+	if (pro && pro->next == NULL)        //这种表达式，如果前面为假后面直接都不用看了，如果你调换了他两个的条件的位置，会引发一个bug。
+	{
+		showtopic("\n要删除的学生信息不存在(按任意键继续....)\n");
+		getch();
+	}
+	else
+	{
+		if (NULL == pro)
+		{
+			pro = head;
+		}
+		p = pro->next;
+		pro->next = p->next;
+		free(p);
+		showpoints(*head);
+		showtopic("\n删除成功！！！！(按任意键继续)");
+		getch();
+	}
+	return pro;
+}
+
+
+
+int main()
+{
+	int rows;
+	int cols;
+	int input = 0;
+	point pointlinkhead1 = { 0, 0, NULL };
+	do
+	{
+		system("cls");
+		printf("\n\n\n");
+		showtopic("*****xx幼儿园学生管理系统*****\n\n\n");
+		showtopic("开始录入学生信息->  1\n");
+		showtopic("查找学生信息->  2\n");
+		showtopic("插入学生信息->  3\n");
+		showtopic("删除学生信息->  4\n");
+		showtopic("排序学生信息->  5\n");
+		showtopic("清除数据->  6\n");
+		showtopic("退出该系统-> 0\n");
+		scanf("%d", &input);
+		fflush(stdin);
+		switch (input)
+		{
+		case 1:
+			system("cls");
+			showtopic("\n请依次录入学生的信息（学号 姓名 成绩）\n\n\n");
+			initpointlink(&pointlinkhead1);
+			showpoints(pointlinkhead1);
+			showtopic("\n录入成功(按任意键继续）\n");
+			getch();
+			break;
+		case 2:
+			system("cls");
+			showtopic("\n请输入学生学号\n");
+			scanf("%d %d", &rows, &cols);
+			printf("%s\n", *found(pointlinkhead1, rows, cols));  //暂时无法使用
+			break;
+		case 3:
+			system("cls");
+			insert(&pointlinkhead1);
+			showpoints(pointlinkhead1);
+			showtopic("\n插入成功！！！！(按任意键继续)");
+			getch();
+			break;
+		case 4:
+			system("cls");
+			delete(&pointlinkhead1);
+			break;
+		case 5:
+			system("cls");
+			ordering(pointlinkhead1);
+			showtopic("\n排序成功！！！！！！(按任意键继续....）\n");
+			showpoints(pointlinkhead1);
+			getch();
+			break;
+		case 6:
+			system("cls");
+			destroy(&pointlinkhead1);
+			showtopic("\n清除数据成功！！！！(按任意键继续)");
+			getch();
+			break;
+		default:
+			showtopic("输入有误请重新输入\n");
+			break;
+
+
+		}
+	} while (input);
+	return 0;
+}
